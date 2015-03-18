@@ -4,6 +4,7 @@ from apiclient.discovery import build
 from apiclient.http import HttpError
 from pprint import pprint
 from optparse import OptionParser
+from tabulate import tabulate
 
 usage = "usage: %prog [options] DOMAIN"
 parser = OptionParser(usage)
@@ -52,37 +53,50 @@ service = build(serviceName='reseller',
 customer_exists = False
 
 # create subscription object for given domain
-try:
-    subscription_record = service.subscriptions().list(customerId=options.domain).execute()
-    subscription_exists = True
-except HttpError, ex:
-    if int(e.resp['status']) == 404:
-        # customer record not found
-        customer_exists = False
-    else:
-        # unknown error!
-        raise
+table = [] #creating empty list
+headers = ["item", "qty", "plan", "start"]
+if options.l is not None:
+    try:
+        subscription_record = service.subscriptions().list(customerId=options.l).execute()
+        subscription_exists = True
+    except HttpError, ex:
+        if int(e.resp['status']) == 404:
+            # customer record not found
+            customer_exists = False
+        else:
+            # unknown error!
+            raise
+    for subscription in subscription_record["subscriptions"]:
+        if subscription["skuId"] in ['Google-Apps-For-Business',
+                                     'Google-Vault',
+                                     'Google-Drive-storage-20GB',
+                                     'Google-Drive-storage-50GB',
+                                     'Google-Drive-storage-200GB',
+                                     'Google-Drive-storage-400GB',
+                                     'Google-Drive-storage-1TB',
+                                     'Google-Drive-storage-2TB',
+                                     'Google-Drive-storage-4TB',
+                                     'Google-Drive-storage-8TB'
+                                     'Google-Drive-storage-16TB'] \
+        and subscription['seats']['licensedNumberOfSeats']!=0:
+            # table.append([str(subscription['skuId']),
+            #               str(subscription['seats']['licensedNumberOfSeats']),
+            #               str(subscription['plan']['planName']),
+            #               str(subscription['renewalSettings']['renewalType'])])
+            pprint(subscription)
+    #print tabulate(table, headers, tablefmt="fancy_grid")
 
 # create customer object for given domain
-try:
-    customer_record = service.customers().get(customerId=options.domain).execute()
-    # a customer record was returned, customer exists
-    customer_exists = True
-except HttpError, ex:
-    if int(e.resp['status']) == 404:
-        # customer record not found
-        customer_exists = False
-    else:
-        # unknown error!
-        raise
-
-pprint(customer_record)
-
-# if options.cmd==
-#     print "reading %s..." % options.filename
-
-for subscription in subscription_record["subscriptions"]:
-    if subscription["skuId"] == 'Google-Apps-For-Business':
-        pprint(subscription)
-
-        # pprint(subscription_record)
+if options.p is not None:
+    try:
+        customer_record = service.customers().get(customerId=options.p).execute()
+        # a customer record was returned, customer exists
+        customer_exists = True
+    except HttpError, ex:
+        if int(e.resp['status']) == 404:
+            # customer record not found
+            customer_exists = False
+        else:
+            # unknown error!
+            raise
+    pprint(customer_record)
