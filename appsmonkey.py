@@ -7,24 +7,11 @@ from optparse import OptionParser
 
 usage = "usage: %prog [options] DOMAIN"
 parser = OptionParser(usage)
-parser.add_option("-l", "--list",
-                  action='store', dest='domain', help="list customer subscriptions for DOMAIN")
-parser.add_option("-p", "--print",
-                  action='store', dest="domain", help="print customer details for DOMAIN")
-parser.add_option("-r", "--renew",
-                  action='store', dest="domain", help="set renewal options for DOMAIN")
+parser.add_option("-l", action='store',  help="list customer subscriptions for DOMAIN")
+parser.add_option("-p", action='store',  help="print customer details for DOMAIN")
+parser.add_option("-r", action='store',  help="set renewal options for DOMAIN")
 
-(options, args) = parser.parse_args()
-print(options)
-print(args)
-
-# if options.cmd is None:
-#     print 'domain is mandatory'
-#     invalid_arguments = True
-
-if len(args) != 0:
-    parser.error("incorrect number of arguments")
-    exit()
+options, args = parser.parse_args()
 
 # establish the list of scopes.
 OAUTH2_SCOPES = [
